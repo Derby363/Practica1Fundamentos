@@ -1,10 +1,10 @@
 //clase pieza. Sus atributos son solo el nombre, codigo, fecha y tipo
 class Pieza {
-    constructor(nombrePieza, codigoPieza, fechaFabricacion, tipoPieza) {
-        this.nombrePieza = 0;
-        this.codigoPieza = 0;
-        this.fechaFabricacion = 0;
-        this.tipoPieza = 0;
+   constructor(nombrePieza, codigoPieza, fechaFabricacion, tipoPieza) {
+        this.nombrePieza = nombrePieza;
+        this.codigoPieza = codigoPieza;
+        this.fechaFabricacion = fechaFabricacion;
+        this.tipoPieza = tipoPieza;
     }
 
 }
@@ -44,6 +44,10 @@ class Fabrica {
 
     //metodo que genera las piezas
     pieceSelection() {
+
+        //array de piezas creadas
+        let piezas = [];
+
         //primero se les asigna la fecha de fabricación, ya que sean mecánicas o eléctricas será la misma
         const fechaActual = new Date();
         this.date = `${fechaActual.getDate()}/${fechaActual.getMonth() + 1}/${fechaActual.getFullYear()}`;
@@ -55,7 +59,7 @@ class Fabrica {
 
             //se le asigna el tipo y el código de pieza
             this.type = "electrica";
-            this.codigoPieza = randomCode + "E";
+            this.codigoPieza = this.randomCode + "E";
 
             //separamos entre 5 posibles nombres
             if (this.randomNum % 5 == 1 ) {
@@ -129,8 +133,8 @@ class Fabrica {
                 }
 
             }
-            //una vez asignados cada atributo, creamos la instancia de la pieza
-            const PiezaElectrica = new PiezaElectrica(this.name, this.codigoPieza, this.date, this.type, this.potencia, this.voltaje);
+            //una vez asignados cada atributo, creamos las instancias de la piezas
+            piezas.push(new PiezaElectrica(this.name, this.codigoPieza, this.date, this.type, this.potencia, this.voltaje));
 
         } else {
 
@@ -160,11 +164,15 @@ class Fabrica {
                 this.material = "Carbono";
             }
             
-            //creamos la instancia de la pieza
-            const PiezaMecanica = new PiezaMecanica(this.name, this.codigoPieza, this.date, this.type, this.material);
+            //creamos las instancias de la piezas
+            piezas.push(new PiezaMecanica(this.name, this.codigoPieza, this.date, this.type, this.material));
+
                 
         }
+        return piezas;
     }
+
+    
 
     
 }
@@ -190,11 +198,11 @@ class EstacionProcesamiento {
         } else {
 
             //si es mecanica elegimos el acabado dependiendo del material
-            if (pieza.material = "Acero") {
+            if (pieza.material == "Acero") {
                 this.procesamiento = "Galvanizada";
-            } else if (pieza.material = "Titanio") {
+            } else if (pieza.material == "Titanio") {
                 this.procesamiento = "Pulida";
-            } else {
+            } else {this.
                 this.procesamiento = "Pintada";
             }
 
