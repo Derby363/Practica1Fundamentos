@@ -51,8 +51,84 @@ class PiezaElectrica extends Pieza {
                 piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
             }
 
+            // Procesar cada pieza y asignar el tratamiento
+            const estacion = new EstacionProcesamiento();
+            piezasGeneradas.forEach(p => {
+                estacion.procesarPieza(p);
+                // store the tratamiento on the pieza for display
+                p.procesamiento = estacion.procesamiento;
+            });
+
             const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
-            if (output) output.innerHTML = `Se generaron ${count} piezas.`;
+
+            // Build a summary of properties (distributions)
+            const voltajeCounts = {};
+            const potenciaCounts = {};
+            const materialCounts = {};
+
+            piezasGeneradas.forEach(p => {
+                if ((p.tipoPieza || p.type) === 'electrica') {
+                    const v = p.voltaje || 'Desconocido';
+                    const pt = p.potencia || 'Desconocida';
+                    voltajeCounts[v] = (voltajeCounts[v] || 0) + 1;
+                    potenciaCounts[pt] = (potenciaCounts[pt] || 0) + 1;
+                } else if ((p.tipoPieza || p.type) === 'mecanica') {
+                    const m = p.material || 'Desconocido';
+                    materialCounts[m] = (materialCounts[m] || 0) + 1;
+                }
+            });
+
+            const formatCounts = (obj) => {
+                const keys = Object.keys(obj);
+                if (keys.length === 0) return '-';
+                return keys.map(k => `${k} (${obj[k]})`).join(', ');
+            };
+
+            let summaryHtml = `<div style="text-align:left; margin-bottom:8px;"><strong>Resumen:</strong><br>`;
+            summaryHtml += `Total: ${count} piezas<br>`;
+            summaryHtml += `Eléctricas: ${electricas} — Voltajes: ${formatCounts(voltajeCounts)}; Potencias: ${formatCounts(potenciaCounts)}<br>`;
+            summaryHtml += `Mecánicas: ${mecanicas} — Materiales: ${formatCounts(materialCounts)}</div>`;
+
+            // Build a detailed HTML table showing the treatment of every piece
+            let detailsHtml = `<table style="width:100%; margin-top:10px; border-collapse:collapse;">`;
+            detailsHtml += `<thead><tr style="text-align:left; background:#efefef;"><th style="padding:6px;border:1px solid #ddd;">Nombre</th><th style="padding:6px;border:1px solid #ddd;">Código</th><th style="padding:6px;border:1px solid #ddd;">Tipo</th><th style="padding:6px;border:1px solid #ddd;">Voltaje</th><th style="padding:6px;border:1px solid #ddd;">Potencia</th><th style="padding:6px;border:1px solid #ddd;">Material</th><th style="padding:6px;border:1px solid #ddd;">Tratamiento</th></tr></thead><tbody>`;
+
+            piezasGeneradas.forEach(p => {
+                const nombre = p.nombrePieza || '-';
+                const codigo = p.codigoPieza || '-';
+                const tipo = p.tipoPieza || p.type || '-';
+                const voltaje = p.voltaje || '-';
+                const potencia = p.potencia || '-';
+                const material = p.material || '-';
+                const tratamiento = p.procesamiento || '-';
+
+                detailsHtml += `<tr><td style="padding:6px;border:1px solid #ddd;">${nombre}</td><td style="padding:6px;border:1px solid #ddd;">${codigo}</td><td style="padding:6px;border:1px solid #ddd;">${tipo}</td><td style="padding:6px;border:1px solid #ddd;">${voltaje}</td><td style="padding:6px;border:1px solid #ddd;">${potencia}</td><td style="padding:6px;border:1px solid #ddd;">${material}</td><td style="padding:6px;border:1px solid #ddd;">${tratamiento}</td></tr>`;
+            });
+
+            detailsHtml += `</tbody></table>`;
+
+            // Render a compact summary and a toggle button to show the full details
+            if (output) {
+                const compactHtml = `<div style="text-align:left; margin-bottom:6px;"><strong>Resumen compacto:</strong> Total ${count} · Eléctricas ${electricas} · Mecánicas ${mecanicas}</div>`;
+                const toggleButtonHtml = `<button id="toggle-details" style="padding:6px 10px; margin-bottom:8px; cursor:pointer;">Mostrar detalles</button>`;
+                const detailsContainer = `<div id="details" style="display:none;">${summaryHtml}${detailsHtml}</div>`;
+                output.innerHTML = compactHtml + toggleButtonHtml + detailsContainer;
+
+                // attach toggle listener
+                const btn = document.getElementById('toggle-details');
+                const detailsDiv = document.getElementById('details');
+                if (btn && detailsDiv) {
+                    btn.addEventListener('click', () => {
+                        if (detailsDiv.style.display === 'none') {
+                            detailsDiv.style.display = 'block';
+                            btn.textContent = 'Ocultar detalles';
+                        } else {
+                            detailsDiv.style.display = 'none';
+                            btn.textContent = 'Mostrar detalles';
+                        }
+                    });
+                }
+            }
             if (stats) stats.innerHTML = `Piezas eléctricas: ${electricas} <br> Piezas mecánicas: ${mecanicas}`;
         };
 
