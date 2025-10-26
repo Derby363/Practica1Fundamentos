@@ -13,168 +13,114 @@ class Pieza {
 class PiezaElectrica extends Pieza {
     constructor(nombrePieza,codigoPieza,fechaFabricacion,tipoPieza,potencia, voltaje) {
         super(nombrePieza,codigoPieza,fechaFabricacion,tipoPieza);
-
-        this.potencia = 0;
-        this.voltaje = 0;
+        // Use the provided potencia and voltaje values
+        this.potencia = potencia;
+        this.voltaje = voltaje;
     }
 }
+
+    // --- Utilities and DOM wiring ---
+    // Count pieces (matches the original logic from the inline script)
+    function contarPiezas(piezas) {
+        let electricas = 0;
+        let mecanicas = 0;
+
+        piezas.forEach(pieza => {
+            // Some piece constructors set `tipoPieza`/`type` inconsistently; check both
+            const tipo = pieza.tipoPieza || pieza.type;
+            if (tipo === "electrica") {
+                electricas++;
+            } else if (tipo === "mecanica") {
+                mecanicas++;
+            }
+        });
+
+        return { electricas, mecanicas };
+    }
+
+    // Wire buttons after DOM loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const output = document.getElementById('output');
+        const stats = document.getElementById('stats');
+
+        const runGeneration = (count) => {
+            const fabrica = new Fabrica();
+            let piezasGeneradas = [];
+
+            for (let i = 0; i < count; i++) {
+                piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
+            }
+
+            const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
+            if (output) output.innerHTML = `Se generaron ${count} piezas.`;
+            if (stats) stats.innerHTML = `Piezas eléctricas: ${electricas} <br> Piezas mecánicas: ${mecanicas}`;
+        };
+
+        const btn100 = document.getElementById('btn-100');
+        const btn1000 = document.getElementById('btn-1000');
+
+        if (btn100) btn100.addEventListener('click', () => runGeneration(100));
+        if (btn1000) btn1000.addEventListener('click', () => runGeneration(1000));
+    });
 
 //en el otro caso, será una PiezaMecanica, que añade el material
 class PiezaMecanica extends Pieza {
     constructor(nombrePieza,codigoPieza,fechaFabricacion,tipoPieza,material) {
         super(nombrePieza,codigoPieza,fechaFabricacion,tipoPieza);
-
-        this.material = "";
+        this.material = material;
     }
 }
 
 //la fabrica genera las piezas aleatoriamente
 class Fabrica {
-
-    constructor(randomNum, name, date, type, potencia, voltaje, material) {
-        this.randomNum = Math.random() * 100;
-        this.name = "";
-        this.date = "";
-        this.type= "";
-        this.potencia = "";
-        this.voltaje = "";
-        this.material = "";
-
+    constructor() {
+        // no persistent state needed; generation is stateless
     }
 
-    //metodo que genera las piezas
+    // metodo que genera las piezas (devuelve un array con 1 pieza)
     pieceSelection() {
+        const piezas = [];
 
-        //array de piezas creadas
-        let piezas = [];
-
-        //primero se les asigna la fecha de fabricación, ya que sean mecánicas o eléctricas será la misma
         const fechaActual = new Date();
-        this.date = `${fechaActual.getDate()}/${fechaActual.getMonth() + 1}/${fechaActual.getFullYear()}`;
-        //por cada llamada al método se genera un número aleatorio de 9 dígitos
+        const dateStr = `${fechaActual.getDate()}/${fechaActual.getMonth() + 1}/${fechaActual.getFullYear()}`;
+
+        // código único aleatorio de 9 dígitos
         const randomCode = Math.floor(Math.random() * 900000000) + 100000000;
 
-        //para que las eléctricas tengán un 30% de probabilidad de ser fabricadas, cogemos nuestro número entre 1 y 100 y lo dividomos entre 30 para separar las probabilidades
-        if (this.randomNum / 30 <= 1) {
+        // probabilidad: 30% eléctrica, 70% mecánica
+        const prob = Math.floor(Math.random() * 100) + 1; // 1..100
 
-            //se le asigna el tipo y el código de pieza
-            this.type = "electrica";
-            this.codigoPieza = this.randomCode + "E";
+        if (prob <= 30) {
+            const tipo = "electrica";
+            const codigo = randomCode + "E";
 
-            //separamos entre 5 posibles nombres
-            if (this.randomNum % 5 == 1 ) {
-                this.nombrePieza = "Placa ABS";
-            } else if (randomNum % 5 == 2) {
-                this.nombrePieza = "Centralita Encendido";
-            } else if (this.randomNum % 5 == 3) {
-                this.nombrePieza = "Bornes Cableado";
-            } else if (this.randomNum % 5 == 4) {
-                this.nombrePieza = "Alternador";
-            } else {
-                this.nombrePieza = "Encendido";
-            }
+            // nombres posibles
+            const nombres = ["Placa ABS", "Centralita Encendido", "Bornes Cableado", "Alternador", "Encendido"];
+            const nombre = nombres[Math.floor(Math.random() * nombres.length)];
 
-            //separamos entre 4 posibles voltajes
-            if (this.randomNum % 4 == 1) {
+            // voltajes y potencias posibles
+            const voltajes = ["1W", "5W", "10W", "20W"];
+            const potencias = ["3.3V", "5V", "12V", "240V"];
+            const voltaje = voltajes[Math.floor(Math.random() * voltajes.length)];
+            const potencia = potencias[Math.floor(Math.random() * potencias.length)];
 
-                this.voltaje = "1W";
-
-                //para que las potencias y los voltajes sean equiprobables, se elige la potencia en la misma condición que elige el voltaje
-                if (this.randomNum % 4 == 1) {
-                    this.potencia = "3.3V";
-                } else if (this.randomNum % 4 == 2) {
-                    this.potencia = "5V";
-                } else if (this.randomNum % 4 == 3) {
-                    this.potencia = "12V";
-                } else {
-                    this.potencia = "240V";
-                }
-
-
-            } else if (this.randomNum % 4 == 2) {
-                this.voltaje = "5W";
-
-                if (this.randomNum % 4 == 1) {
-                    this.potencia = "3.3V";
-                } else if (this.randomNum % 4 == 2) {
-                    this.potencia = "5V";
-                } else if (this.randomNum % 4 == 3) {
-                    this.potencia = "12V";
-                } else {
-                    this.potencia = "240V";
-                }
-
-            } else if (this.randomNum % 4 == 3) {
-
-                this.voltaje = "10W";
-
-                if (this.randomNum % 4 == 1) {
-                    this.potencia = "3.3V";
-                } else if (this.randomNum % 4 == 2) {
-                    this.potencia = "5V";
-                } else if (this.randomNum % 4 == 3) {
-                    this.potencia = "12V";
-                } else {
-                    this.potencia = "240V";
-                }
-
-            } else {
-
-                this.voltaje = "20W";
-
-                if (this.randomNum % 4 == 1) {
-                    this.potencia = "3.3V";
-                } else if (this.randomNum % 4 == 2) {
-                    this.potencia = "5V";
-                } else if (this.randomNum % 4 == 3) {
-                    this.potencia = "12V";
-                } else {
-                    this.potencia = "240V";
-                }
-
-            }
-            //una vez asignados cada atributo, creamos las instancias de la piezas
-            piezas.push(new PiezaElectrica(this.name, this.codigoPieza, this.date, this.type, this.potencia, this.voltaje));
-
+            piezas.push(new PiezaElectrica(nombre, codigo, dateStr, tipo, potencia, voltaje));
         } else {
+            const tipo = "mecanica";
+            const codigo = randomCode + "M";
 
-            //seguimos un procedimiento muy parecido a con las piezas eléctricas
-            this.type = "mecanica";
-            this.codigoPieza = randomCode + "M"
+            const nombres = ["Larguero Inferior", "Guardabarros", "Larguero Superior", "Subchasis", "Puerta"];
+            const nombre = nombres[Math.floor(Math.random() * nombres.length)];
 
-            //elegimos entre 5 posibles nombres
-            if (this.randomNum % 5 == 1) {
-                this.nombrePieza = "Larguero Inferior";
-            } else if (randomNum % 5 == 2) {
-                this.nombrePieza="Guardabarros";
-            } else if (this.randomNum % 5 == 3) {
-                this.nombrePieza = "Larguero Superior";
-            } else if (this.randomNum % 5 == 4) {
-                this.nombrePieza = "Subchasis";
-            } else {
-                this.nombrePieza = "Puerta";
-            }
+            const materiales = ["Acero", "Titanio", "Carbono"];
+            const material = materiales[Math.floor(Math.random() * materiales.length)];
 
-            //elegimos entre 3 posibles materiales
-            if (this.randomNum % 3 == 1) {
-                this.material = "Acero";
-            } else if (this.randomNum % 3 == 2) {
-                this.material = "Titanio";
-            } else {
-                this.material = "Carbono";
-            }
-            
-            //creamos las instancias de la piezas
-            piezas.push(new PiezaMecanica(this.name, this.codigoPieza, this.date, this.type, this.material));
-
-                
+            piezas.push(new PiezaMecanica(nombre, codigo, dateStr, tipo, material));
         }
+
         return piezas;
     }
 
-    
-
-    
 }
 
 class EstacionProcesamiento {
@@ -185,27 +131,25 @@ class EstacionProcesamiento {
 
     //el método procesarPieza identifica el tipo de la pieza para aplicarle el tratamiento correspondiente
     procesarPieza(pieza) {
-
-        if (pieza.type == "electrica") {
-
-            //si es eléctrica elegimos el barnizado dependiendo de su voltaje
+        // Use the unified property name `tipoPieza`
+        if (pieza.tipoPieza == "electrica") {
+            // si es eléctrica elegimos el barnizado dependiendo de su voltaje
             if (pieza.voltaje == "1W" || pieza.voltaje == "5W") {
                 this.procesamiento = "Barnizada Normal";
             } else {
                 this.procesamiento = "Barnizada especial";
             }
-
-        } else {
-
-            //si es mecanica elegimos el acabado dependiendo del material
+        } else if (pieza.tipoPieza == "mecanica") {
+            // si es mecanica elegimos el acabado dependiendo del material
             if (pieza.material == "Acero") {
                 this.procesamiento = "Galvanizada";
             } else if (pieza.material == "Titanio") {
                 this.procesamiento = "Pulida";
-            } else {this.
+            } else {
                 this.procesamiento = "Pintada";
             }
-
+        } else {
+            this.procesamiento = "Desconocido";
         }
 
     }

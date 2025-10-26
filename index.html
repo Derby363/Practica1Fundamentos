@@ -52,56 +52,5 @@
     </div>
 
     <script src="javascript.js"></script>
-    <script>
-        
-        // Función para contar las piezas
-        function contarPiezas(piezas) {
-            let electricas = 0;
-            let mecanicas = 0;
-
-            piezas.forEach(pieza => {
-                if (pieza.tipoPieza === "electrica") {
-                    electricas++;
-                } else if (pieza.tipoPieza === "mecanica") {
-                    mecanicas++;
-                }
-            });
-
-            return { electricas, mecanicas };
-        }
-
-        // Funciones que se ejecutan al hacer clic en los botones
-        document.getElementById('btn-100').addEventListener('click', () => {
-            let fabrica = new Fabrica();
-            let piezasGeneradas = [];
-
-            for (let i = 0; i < 100; i++) {
-                piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
-            }
-
-            const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
-            document.getElementById('output').innerHTML = `Se generaron 100 piezas.`;
-            document.getElementById('stats').innerHTML = `
-                Piezas eléctricas: ${electricas} <br>
-                Piezas mecánicas: ${mecanicas}
-            `;
-        });
-
-        document.getElementById('btn-1000').addEventListener('click', () => {
-            let fabrica = new Fabrica();
-            let piezasGeneradas = [];
-
-            for (let i = 0; i < 1000; i++) {
-                piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
-            }
-
-            const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
-            document.getElementById('output').innerHTML = `Se generaron 1000 piezas.`;
-            document.getElementById('stats').innerHTML = `
-                Piezas eléctricas: ${electricas} <br>
-                Piezas mecánicas: ${mecanicas}
-            `;
-        });
-    </script>
 </body>
 </html>
