@@ -7,14 +7,12 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
             background-color: #f4f4f9;
         }
         .container {
+            max-width: 600px;
+            margin: 0 auto;
             text-align: center;
             padding: 20px;
         }
@@ -31,14 +29,15 @@
         button:hover {
             background-color: #45a049;
         }
-        #output {
+        #output, #details {
             margin-top: 20px;
             padding: 10px;
             background-color: #e0e0e0;
             border-radius: 5px;
         }
-        #stats {
-            margin-top: 20px;
+        #details {
+            display: none;
+            text-align: left;
         }
     </style>
 </head>
@@ -48,60 +47,54 @@
         <button id="btn-100">Generar 100 piezas</button>
         <button id="btn-1000">Generar 1000 piezas</button>
         <div id="output"></div>
-        <div id="stats"></div>
+        <button id="toggle-details" style="display:none;">Mostrar más detalles</button>
+        <div id="details"></div>
     </div>
 
-    <script src="javascript.js"></script>
     <script>
-        
-        // Función para contar las piezas
-        function contarPiezas(piezas) {
-            let electricas = 0;
-            let mecanicas = 0;
-
-            piezas.forEach(pieza => {
-                if (pieza.tipoPieza === "electrica") {
-                    electricas++;
-                } else if (pieza.tipoPieza === "mecanica") {
-                    mecanicas++;
-                }
-            });
-
-            return { electricas, mecanicas };
+        // Clase de ejemplo para simular la fábrica
+        class Fabrica {
+            pieceSelection() {
+                const tipo = Math.random() > 0.5 ? "electrica" : "mecanica";
+                return [{ tipoPieza: tipo }];
+            }
         }
 
-        // Funciones que se ejecutan al hacer clic en los botones
-        document.getElementById('btn-100').addEventListener('click', () => {
+        function mostrarDetalles(piezas) {
+            const lista = piezas.map((pieza, index) => `<li>Pieza ${index + 1}: ${pieza.tipoPieza}</li>`).join('');
+            document.getElementById('details').innerHTML = `<ul>${lista}</ul>`;
+            document.getElementById('toggle-details').style.display = 'inline-block';
+            document.getElementById('details').style.display = 'none';
+        }
+
+        document.getElementById('toggle-details').addEventListener('click', () => {
+            const details = document.getElementById('details');
+            const toggleBtn = document.getElementById('toggle-details');
+            const isHidden = details.style.display === 'none';
+
+            details.style.display = isHidden ? 'block' : 'none';
+            toggleBtn.textContent = isHidden ? 'Ocultar detalles' : 'Mostrar más detalles';
+
+            // Si se ocultan los detalles, subir al inicio
+            if (!isHidden) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        function generarPiezas(cantidad) {
             let fabrica = new Fabrica();
             let piezasGeneradas = [];
 
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < cantidad; i++) {
                 piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
             }
 
-            const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
-            document.getElementById('output').innerHTML = `Se generaron 100 piezas.`;
-            document.getElementById('stats').innerHTML = `
-                Piezas eléctricas: ${electricas} <br>
-                Piezas mecánicas: ${mecanicas}
-            `;
-        });
+            document.getElementById('output').innerHTML = `Se generaron ${cantidad} piezas.`;
+            mostrarDetalles(piezasGeneradas);
+        }
 
-        document.getElementById('btn-1000').addEventListener('click', () => {
-            let fabrica = new Fabrica();
-            let piezasGeneradas = [];
-
-            for (let i = 0; i < 1000; i++) {
-                piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
-            }
-
-            const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
-            document.getElementById('output').innerHTML = `Se generaron 1000 piezas.`;
-            document.getElementById('stats').innerHTML = `
-                Piezas eléctricas: ${electricas} <br>
-                Piezas mecánicas: ${mecanicas}
-            `;
-        });
+        document.getElementById('btn-100').addEventListener('click', () => generarPiezas(100));
+        document.getElementById('btn-1000').addEventListener('click', () => generarPiezas(1000));
     </script>
 </body>
 </html>
