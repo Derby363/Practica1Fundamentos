@@ -29,7 +29,7 @@
         button:hover {
             background-color: #45a049;
         }
-        #output, #details {
+        #output, #stats, #details {
             margin-top: 20px;
             padding: 10px;
             background-color: #e0e0e0;
@@ -47,17 +47,25 @@
         <button id="btn-100">Generar 100 piezas</button>
         <button id="btn-1000">Generar 1000 piezas</button>
         <div id="output"></div>
+        <div id="stats"></div>
         <button id="toggle-details" style="display:none;">Mostrar más detalles</button>
         <div id="details"></div>
     </div>
 
     <script>
-        // Clase de ejemplo para simular la fábrica
-        class Fabrica {
-            pieceSelection() {
-                const tipo = Math.random() > 0.5 ? "electrica" : "mecanica";
-                return [{ tipoPieza: tipo }];
-            }
+        function contarPiezas(piezas) {
+            let electricas = 0;
+            let mecanicas = 0;
+
+            piezas.forEach(pieza => {
+                if (pieza.tipoPieza === "electrica") {
+                    electricas++;
+                } else if (pieza.tipoPieza === "mecanica") {
+                    mecanicas++;
+                }
+            });
+
+            return { electricas, mecanicas };
         }
 
         function mostrarDetalles(piezas) {
@@ -69,16 +77,7 @@
 
         document.getElementById('toggle-details').addEventListener('click', () => {
             const details = document.getElementById('details');
-            const toggleBtn = document.getElementById('toggle-details');
-            const isHidden = details.style.display === 'none';
-
-            details.style.display = isHidden ? 'block' : 'none';
-            toggleBtn.textContent = isHidden ? 'Ocultar detalles' : 'Mostrar más detalles';
-
-            // Si se ocultan los detalles, subir al inicio
-            if (!isHidden) {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
         });
 
         function generarPiezas(cantidad) {
@@ -89,7 +88,12 @@
                 piezasGeneradas = piezasGeneradas.concat(fabrica.pieceSelection());
             }
 
+            const { electricas, mecanicas } = contarPiezas(piezasGeneradas);
             document.getElementById('output').innerHTML = `Se generaron ${cantidad} piezas.`;
+            document.getElementById('stats').innerHTML = `
+                Piezas eléctricas: ${electricas} <br>
+                Piezas mecánicas: ${mecanicas}
+            `;
             mostrarDetalles(piezasGeneradas);
         }
 
