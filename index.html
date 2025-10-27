@@ -11,7 +11,9 @@
             background-color: #f4f4f9;
         }
         .container {
-            max-width: 600px;
+            /* Aumentado ancho máximo para mejorar lectura de tablas */
+            max-width: 1000px;
+            width: 92%;
             margin: 0 auto;
             text-align: center;
             padding: 20px;
@@ -38,6 +40,24 @@
         #details {
             display: none;
             text-align: left;
+            /* permitir scroll horizontal si la tabla es más ancha que el contenedor */
+            overflow-x: auto;
+        }
+        /* Estilos de la tabla para mejorar legibilidad */
+        #details table {
+            width: 100%;
+            min-width: 900px; /* fuerza una tabla amplia en pantallas grandes */
+            border-collapse: collapse;
+        }
+        #details th, #details td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #d0d0d0;
+            text-align: left;
+            vertical-align: top;
+        }
+        #details thead th {
+            background: linear-gradient(#f7f7f7, #eee);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -52,6 +72,7 @@
         <div id="details"></div>
     </div>
 
+    <script src="javascript.js"></script>
     <script>
         function contarPiezas(piezas) {
             let electricas = 0;
@@ -69,15 +90,84 @@
         }
 
         function mostrarDetalles(piezas) {
-            const lista = piezas.map((pieza, index) => `<li>Pieza ${index + 1}: ${pieza.tipoPieza}</li>`).join('');
-            document.getElementById('details').innerHTML = `<ul>${lista}</ul>`;
+            if (!piezas || piezas.length === 0) {
+                document.getElementById('details').innerHTML = '<em>No hay piezas para mostrar.</em>';
+                document.getElementById('toggle-details').style.display = 'none';
+                return;
+            }
+
+            // Construir una tabla con las columnas solicitadas
+            const rows = piezas.map((pieza, index) => {
+                const nombre = (pieza.nombrePieza !== undefined && pieza.nombrePieza !== '') ? pieza.nombrePieza : '---';
+                const codigo = (pieza.codigoPieza !== undefined && pieza.codigoPieza !== '') ? pieza.codigoPieza : '---';
+                const tipo = (pieza.tipoPieza !== undefined && pieza.tipoPieza !== '') ? pieza.tipoPieza : '---';
+                const potencia = (pieza.potencia !== undefined && pieza.potencia !== '') ? pieza.potencia : '---';
+                const voltaje = (pieza.voltaje !== undefined && pieza.voltaje !== '') ? pieza.voltaje : '---';
+                const material = (pieza.material !== undefined && pieza.material !== '') ? pieza.material : '---';
+
+                // Calcular procesamiento usando EstacionProcesamiento si existe
+                let procesamiento = '---';
+                try {
+                    if (typeof EstacionProcesamiento !== 'undefined') {
+                        const est = new EstacionProcesamiento();
+                        est.procesarPieza(pieza);
+                        procesamiento = est.procesamiento || '---';
+                    }
+                } catch (e) {
+                    procesamiento = '---';
+                }
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(nombre)}</td>
+                        <td>${escapeHtml(codigo)}</td>
+                        <td>${escapeHtml(tipo)}</td>
+                        <td>${escapeHtml(potencia)}</td>
+                        <td>${escapeHtml(voltaje)}</td>
+                        <td>${escapeHtml(material)}</td>
+                        <td>${escapeHtml(procesamiento)}</td>
+                    </tr>`;
+            }).join('');
+
+            const table = `
+                <table style="width:100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Nombre</th>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Código</th>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Tipo</th>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Potencia</th>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Voltaje</th>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Material</th>
+                            <th style="border-bottom:1px solid #999; text-align:left; padding:6px">Procesamiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>`;
+
+            document.getElementById('details').innerHTML = table;
             document.getElementById('toggle-details').style.display = 'inline-block';
             document.getElementById('details').style.display = 'none';
         }
 
+        // pequeña función de escape para evitar inyección de HTML en los valores
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         document.getElementById('toggle-details').addEventListener('click', () => {
             const details = document.getElementById('details');
-            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+            const btn = document.getElementById('toggle-details');
+            const isHidden = details.style.display === 'none' || details.style.display === '';
+            details.style.display = isHidden ? 'block' : 'none';
+            btn.textContent = isHidden ? 'Ocultar detalles' : 'Mostrar más detalles';
         });
 
         function generarPiezas(cantidad) {
