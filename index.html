@@ -11,7 +11,7 @@
             background-color: #f4f4f9;
         }
         .container {
-            /* Aumentado ancho máximo para mejorar lectura de tablas */
+            /*ancho de la tabla*/
             max-width: 1000px;
             width: 92%;
             margin: 0 auto;
@@ -40,10 +40,10 @@
         #details {
             display: none;
             text-align: left;
-            /* permitir scroll horizontal si la tabla es más ancha que el contenedor */
+            /*permitir scroll horizontal si la tabla es más ancha que el contenedor*/
             overflow-x: auto;
         }
-        /* Estilos de la tabla para mejorar legibilidad */
+        /*estilos de la tabla*/
         #details table {
             width: 100%;
             min-width: 900px; /* fuerza una tabla amplia en pantallas grandes */
@@ -96,7 +96,7 @@
                 return;
             }
 
-            // Construir una tabla con las columnas solicitadas
+            //construir una tabla con una columna por atributo de la pieza
             const rows = piezas.map((pieza, index) => {
                 const nombre = (pieza.nombrePieza !== undefined && pieza.nombrePieza !== '') ? pieza.nombrePieza : '---';
                 const codigo = (pieza.codigoPieza !== undefined && pieza.codigoPieza !== '') ? pieza.codigoPieza : '---';
@@ -105,7 +105,7 @@
                 const voltaje = (pieza.voltaje !== undefined && pieza.voltaje !== '') ? pieza.voltaje : '---';
                 const material = (pieza.material !== undefined && pieza.material !== '') ? pieza.material : '---';
 
-                // Calcular procesamiento usando EstacionProcesamiento si existe
+                //conseguir el procesamiento adecuado
                 let procesamiento = '---';
                 try {
                     if (typeof EstacionProcesamiento !== 'undefined') {
@@ -152,7 +152,7 @@
             document.getElementById('details').style.display = 'none';
         }
 
-        // pequeña función de escape para evitar inyección de HTML en los valores
+        //pequeña función de escape para evitar inyección de HTML en los valores
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -192,3 +192,4 @@
     </script>
 </body>
 </html>
+
